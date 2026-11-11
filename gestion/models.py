@@ -177,6 +177,7 @@ class Usuario(models.Model):
     id_usuario = models.AutoField(primary_key=True)
     nombre_usuario = models.CharField(max_length=100)
     rol = models.CharField(max_length=100)
+    password = models.CharField(max_length=255)
 
     class Meta:
         managed = False

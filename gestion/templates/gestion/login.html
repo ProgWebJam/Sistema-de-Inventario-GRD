@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Inventario GRD</title>
+    <!-- Bootstrap 5 CSS Local -->
+    <link href="{% static 'gestion/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'gestion/css/style.css' %}" rel="stylesheet">
+</head>
+<!-- Reemplaza la etiqueta body actual por esta -->
+<body class="bg-light d-flex align-items-center justify-content-center vh-100">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="card shadow-lg border-0 rounded-4 p-3">
+                    <div class="card-body">
+                        
+                        <!-- Logo Centrado en la parte superior -->
+                        <div class="text-center mb-4">
+                            <!-- Si guardas tu logo en gestion/static/gestion/images/logo.png se mostrará aquí -->
+                            <img src="{% static 'gestion/images/logo.png' %}" alt="Logo SENA" style="max-height: 65px;" class="mb-2" onerror="this.style.display='none'">
+                            <h3 class="fw-bold mb-1 text-titulo">Inventario GRD</h3>
+                            <p class="text-muted small">Ingrese sus credenciales para acceder</p>
+                        </div>
+
+                        <!-- Alerta de error si las credenciales fallan -->
+                        {% if error %}
+                        <div class="alert alert-danger py-2 small text-center" role="alert">
+                            {{ error }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Formulario de Login -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            
+                            <!-- Campo Nombre de Usuario (Etiqueta en Verde) -->
+                            <div class="mb-3">
+                                <label for="nombre_usuario" class="form-label fw-semibold text-sena">Nombre de Usuario</label>
+                                <input type="text" class="form-control rounded-3" id="nombre_usuario" name="nombre_usuario" placeholder="Ingrese el usuario" required>
+                            </div>
+
+                            <!-- Campo Contraseña (Etiqueta en Verde) -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label fw-semibold text-sena">Contraseña</label>
+                                <input type="password" class="form-control rounded-3" id="password" name="password" placeholder="Ingrese la contraseña" required>
+                            </div>
+
+                            <!-- Botón Ingresar en Verde y Redondeado -->
+                            <div class="d-grid my-4">
+                                <button type="submit" class="btn btn-sena btn-lg rounded-pill fw-semibold shadow-sm">Iniciar sesión</button>
+                            </div>
+
+                        </form>
+
+                        <!-- Leyendas inferiores -->
+                        <div class="d-flex justify-content-between text-small mt-3">
+                            <a href="{% url 'crear_usuario' %}" class="text-decoration-none text-muted small">Crear usuario</a>
+                            <a href="#" class="text-decoration-none text-muted small">¿Olvidé la contraseña?</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle Local -->
+    <script src="{% static 'gestion/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

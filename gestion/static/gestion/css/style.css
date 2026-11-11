@@ -1,0 +1,31 @@
+ /* Posicion de card del formulario de login (centrado) */
+        html, body {
+        height: 100%;
+        margin: 0;
+        }
+        /* Color del texto Nombre de Usuario,Contraseña de login */
+        .text-sena {
+            color: #39A900 !important;
+        }
+        /* Color del titulo de login : "Inventario GRD"*/
+        .text-titulo {
+            color: #ff6900;
+        }
+
+           /* Color del titulo de Crear usuario : "Nuevo Usuario"*/
+        .text-titulo2 {
+            color: #FCBA02;
+
+        }
+        /* Boton Ingresar de la pagina login */
+        .btn-sena {
+            background-color: #39A900;
+            border-color: #39A900;
+            color: white;
+        }
+
+        .btn-sena:hover {
+            background-color: #2e8600;
+            border-color: #2e8600;
+            color: white;
+        }

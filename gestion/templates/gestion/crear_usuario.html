@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Usuario - Inventario GRD</title>
+    <!-- Bootstrap 5 CSS Local -->
+    <link href="{% static 'gestion/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'gestion/css/style.css' %}" rel="stylesheet">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center min-vh-100 m-0">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="card shadow-lg border-0 rounded-4 p-3">
+                    <div class="card-body">
+                        
+                        <!-- Encabezado -->
+                        <div class="text-center mb-4">
+                            <img src="{% static 'gestion/images/logo.png' %}" alt="Logo SENA" style="max-height: 65px;" class="mb-2" onerror="this.style.display='none'">
+                            <h3 class="fw-bold mb-1 text-titulo2">Nuevo Usuario</h3>
+                            <p class="text-muted small">Registre las credenciales de acceso</p>
+                        </div>
+
+                        <!-- Mensajes de Alerta / Éxito -->
+                        {% if error %}
+                        <div class="alert alert-danger alert-dismissible fade show py-2 small text-center" role="alert">
+                            {{ error }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                        
+                        {% if success %}
+                        <div class="alert alert-success alert-dismissible fade py-2 small text-center" role="alert">
+                            {{ success }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+
+                        <!-- Formulario de Creación -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            
+                            <!-- Nombre de Usuario -->
+                            <div class="mb-3">
+                                <label for="nombre_usuario" class="form-label fw-semibold text-sena">Nombre de Usuario</label>
+                                <input type="text" class="form-control rounded-3" id="nombre_usuario" name="nombre_usuario" placeholder="Ej. jhon_sena" required>
+                            </div>
+
+                            <!-- Contraseña -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label fw-semibold text-sena">Contraseña</label>
+                                <input type="password" class="form-control rounded-3" id="password" name="password" placeholder="••••••••" required>
+                            </div>
+
+                            <!-- Rol (Lista desplegable basada en tu BD) -->
+                            <div class="mb-3">
+                                <label for="rol" class="form-label fw-semibold text-sena">Rol en el Sistema</label>
+                                <br>
+                                <select class="form-select rounded-3" id="rol" name="rol" required>
+                                    <option value="" selected disabled>Seleccione un rol...</option>
+                                    <option value="cuentante">Cuentante</option>
+                                    <option value="invitado">Invitado</option>
+                                    <option value="administrador">Administrador</option>
+                                </select>
+                            </div>
+
+                            <!-- Botón Registrar -->
+                            <div class="d-grid my-4">
+                                <button type="submit" class="btn btn-sena btn-lg rounded-pill fw-semibold shadow-sm">Registrar Usuario</button>
+                            </div>
+
+                        </form>
+
+                        <!-- Enlace para volver al Login -->
+                        <div class="text-center mt-3">
+                            <a href="{% url 'login' %}" class="text-decoration-none text-muted small">← Volver al inicio de sesión</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle Local -->
+    <script src="{% static 'gestion/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
