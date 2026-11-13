@@ -2,6 +2,9 @@
         html, body {
         height: 100%;
         margin: 0;
+        width: 100%;
+        overflow-x: hidden;
+        background-color: #f4f6f9;
         }
         /* Color del texto Nombre de Usuario,Contraseña de login */
         .text-sena {
@@ -28,4 +31,60 @@
             background-color: #2e8600;
             border-color: #2e8600;
             color: white;
+        }
+
+        /* gestion/static/gestion/css/style.css */
+
+        /* Estructura del Sidebar Lateral */
+        .sidebar {
+            width: 260px;
+            min-width: 260px;
+            background-color: #1b2838;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover, 
+        .sidebar .nav-link.active {
+            background-color: #39A900; /* Verde SENA */
+            color: white;
+        }
+
+        /* Contenedor principal que ocupa todo el ancho restante sin dejar espacios */
+        .main-content-wrapper{
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Tarjetas del Dashboard con tamaño uniforme */
+        .dashboard-card {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Estilo para el perfil superior */
+        .user-profile-badge {
+            background-color: #ffffff;
+            border: 1px solid #e3e6f0;
+            padding: 6px 15px;
+            border-radius: 50rem;
+        }
+
+        .barra-superior{
+            background-color: #E8F4E0;
         }

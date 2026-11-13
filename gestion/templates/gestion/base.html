@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Panel Principal - Inventario GRD{% endblock %}</title>
+    <!-- Bootstrap 5 CSS Local -->
+    <link href="{% static 'gestion/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Bootstrap Icons CDN Oficial -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Estilos personalizados -->
+    <link href="{% static 'gestion/css/style.css' %}" rel="stylesheet">
+</head>
+<body class="bg-light m-0">
+
+    <div class="d-flex">
+        
+        <!-- SIDEBAR IZQUIERDO -->
+        <nav class="sidebar d-flex flex-column p-3 shadow">
+            <div class="text-center py-3 mb-3 border-bottom border-secondary">
+                <h4 class="fw-bold text-white m-0">IGRD</h4>
+                <small class="text-success fw-semibold">Inventario Gestion de Redes de Datos</small>
+            </div>
+            
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="{% url 'pagina_inicio' %}" class="nav-link active">
+                        <i class="bi bi-house-door-fill me-2"></i> Inicio
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'gestionar_bienes' %}" class="nav-link">
+                        <i class="bi bi-box-seam me-2"></i> Bienes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'gestionar_ubicacion' %}" class="nav-link">
+                        <i class="bi bi-geo-alt-fill me-2"></i> Ubicacion
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'gestionar_estado' %}" class="nav-link">
+                        <i class="bi bi-tag-fill me-2"></i> Estado
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'gestionar_foto' %}" class="nav-link">
+                        <i class="bi bi-images me-2"></i> Fotos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'gestionar_usuario' %}" class="nav-link">
+                        <i class="bi bi-people-fill me-2"></i> Usuario
+                    </a>
+                </li>
+            </ul>
+            
+            <hr class="border-secondary">
+            
+            <!-- Botón Cerrar Sesión -->
+            <div class="d-grid">
+                <a href="{% url 'login' %}" class="btn btn-danger btn-sm text-white shadow-sm py-2">
+                    <i class="bi bi-box-arrow-left me-1"></i> Cerrar Sesión
+                </a>
+            </div>
+        </nav>
+
+        <!-- CONTENEDOR PRINCIPAL -->
+        <div class="main-content-wrapper d-flex flex-column ">
+            
+            <!-- TOP NAVBAR SUPERIOR (Ocupa todo el ancho w-100) -->
+            <header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm w-100 px-4 py-2">
+                <div class="container-fluid px-0 ">
+                    <span class="navbar-brand mb-0 h5 fw-bold text-dark">Panel de Control General</span>
+                    
+                    <!-- PERFIL DE USUARIO REAL EN LA PARTE SUPERIOR DERECHA -->
+                    <div class="d-flex align-items-center ms-auto">
+                        <div class="user-profile-badge d-flex align-items-center shadow-sm">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 40px; height: 40px;">
+                                <i class="bi bi-person-fill fs-5"></i>
+                            </div>
+                            <div class="pr-1"></div>
+                            <div class="text-start pe-2">
+                                <h6 class="mb-0 fw-bold text-dark text-capitalize" style="font-size: 13px; ">{{ nombre_usuario }}</h6>
+                                <span class="text-muted text-capitalize" style="font-size: 11px;">Rol: {{ rol_usuario }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <!-- CUERPO DE LA APLICACIÓN (Dashboard con más espacio/separación g-4 gy-5) -->
+            <main class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3 class="fw-bold text-dark">{% block title2 %} Titulo del Contenido {% endblock %}</h3>
+                        <p class="text-muted small">{% block description %} Descripción del Titulo  {% endblock %}</p>
+                    </div>
+                </div>                
+                <!-- ESPACIO DINÁMICO DONDE CADA VISTA INYECTARÁ SU CONTENIDO -->
+                {% block content %}
+                <!-- Aquí se renderiza el contenido específico de cada página -->
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle Local -->
+    <script src="{% static 'gestion/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

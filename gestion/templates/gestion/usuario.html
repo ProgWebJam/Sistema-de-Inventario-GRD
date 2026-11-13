@@ -1,0 +1,107 @@
+{% extends 'gestion/base.html' %}
+
+{% block title %}Gestión de Usuarios - Inventario GRD{% endblock %}
+
+
+{% block title2 %} Gestión de Usuario de la Aplicación {% endblock %}
+{% block description %} Registre las Usuario con rol Cuentante, Invitado, Administrador etc. {% endblock %}
+
+{% block content %}
+
+<!-- Alertas de Error o Éxito -->
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+    {{ success }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Columna Izquierda: Formulario de Registro -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h5 class="fw-bold text-dark mb-1">Nuevo Usuario</h5>
+                    <p class="text-muted small">Ingrese las credenciales de acceso</p>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control rounded-3" id="nombre_usuario" name="nombre_usuario" placeholder="Ej. jhon_sena" required>
+                        <label for="nombre_usuario">Nombre de Usuario *</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control rounded-3" id="password" name="password" placeholder="Contraseña" required>
+                        <label for="password">Contraseña *</label>
+                        <div class="form-text px-1" style="font-size: 11px;">Mín. 8 caracteres, mayúscula, minúscula y carácter especial.</div>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <select class="form-select rounded-3" id="rol" name="rol" required>
+                            <option value="" selected disabled>Seleccione un rol...</option>
+                            <option value="administrador">Administrador</option>
+                            <option value="operador">Operador</option>
+                            <option value="cuentante">Cuentante</option>
+                        </select>
+                        <label for="rol">Rol en el Sistema *</label>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sena rounded-pill fw-semibold shadow-sm py-2">Registrar Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna Derecha: Tabla de Usuarios Registrados -->
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3 text-dark">Usuarios Registrados en el Sistema</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th># ID</th>
+                                <th>Nombre de Usuario</th>
+                                <th>Rol</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in usuarios %}
+                            <tr>
+                                <td class="fw-semibold text-secondary">{{ u.id_usuario }}</td>
+                                <td class="fw-bold text-dark">{{ u.nombre_usuario }}</td>
+                                <td>
+                                    <span class="fw-bold text-dark">
+                                        {{ u.rol }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">No hay usuarios registrados en este momento.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

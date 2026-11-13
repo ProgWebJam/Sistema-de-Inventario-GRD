@@ -1,0 +1,77 @@
+{% extends 'gestion/base.html' %}
+
+{% block title %}Gestión de Fotos - Inventario GRD{% endblock %}
+
+
+{% block title2 %} Gestión de Fotos de los Bienes {% endblock %}
+{% block description %} Registre las Fotos como computador , mesa , silla etc. {% endblock %}
+
+{% block content %}
+
+<!-- Alertas -->
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+    {{ success }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Formulario de Registro -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3 text-dark">Nueva Foto</h5>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control rounded-3" id="nombre_foto" name="nombre_foto" placeholder="Nombre de la Foto" required>
+                        <label for="nombre_foto">Nombre de la Foto *</label>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sena rounded-pill fw-semibold shadow-sm">Guardar Foto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Ubicaciones Existentes -->
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3 text-dark">Fotos Registradas</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th># ID</th>
+                                <th>Nombre de la Foto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for img in fotos %}
+                            <tr>
+                                <td class="fw-semibold text-secondary">{{ img.id_foto }}</td>
+                                <td class="fw-bold text-dark">{{ img.nombre_foto }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted py-4">No hay Fotos registradas aún.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

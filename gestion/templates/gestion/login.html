@@ -22,7 +22,7 @@
                         <div class="text-center mb-4">
                             <!-- Si guardas tu logo en gestion/static/gestion/images/logo.png se mostrará aquí -->
                             <img src="{% static 'gestion/images/logo.png' %}" alt="Logo SENA" style="max-height: 65px;" class="mb-2" onerror="this.style.display='none'">
-                            <h3 class="fw-bold mb-1 text-titulo">Inventario GRD</h3>
+                            <h3 class="fw-bold mb-1 text-titulo">IGRD</h3>
                             <p class="text-muted small">Ingrese sus credenciales para acceder</p>
                         </div>
 
@@ -58,7 +58,7 @@
 
                         <!-- Leyendas inferiores -->
                         <div class="d-flex justify-content-between text-small mt-3">
-                            <a href="{% url 'crear_usuario' %}" class="text-decoration-none text-muted small">Crear usuario</a>
+                            <a href="{% url 'crear_usuario_publico' %}" class="text-decoration-none text-muted small">Crear usuario</a>
                             <a href="#" class="text-decoration-none text-muted small">¿Olvidé la contraseña?</a>
                         </div>
 

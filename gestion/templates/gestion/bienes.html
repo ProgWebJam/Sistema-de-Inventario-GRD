@@ -1,0 +1,126 @@
+{% extends 'gestion/base.html' %}
+
+{% block title %}Gestión de Bienes - Inventario GRD{% endblock %}
+
+
+{% block title2 %} Gestión de Bienes Institucionales {% endblock %}
+{% block description %} Control de inventario, equipos y elementos asociados a sus respectivas zonas y estados. {% endblock %}
+
+{% block content %}
+
+<!-- Alertas informativas -->
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+    {{ success }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Columna Izquierda: Formulario de Registro con Selects Dinámicos -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3 text-dark">Registrar Nuevo Bien</h5>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control rounded-3" id="codigo_bien" name="codigo_bien" placeholder="Ej. SENA-001" required>
+                        <label for="codigo_bien">Código del Bien *</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control rounded-3" id="nombre_bien" name="nombre_bien" placeholder="Ej. Switch Cisco 2960" required>
+                        <label for="nombre_bien">Nombre / Descripción *</label>
+                    </div>
+
+                    <!-- SELECT DINÁMICO DE UBICACIÓN -->
+                    <div class="form-floating mb-3">
+                        <label for="ubicacion">Ubicación (Zona) *</label>
+                        <br>
+                        <select class="form-select rounded-3" id="ubicacion" name="ubicacion" required>
+                            <option value="" selected disabled>Seleccione una ubicación...</option>
+                            {% for ubi in ubicaciones %}
+                                <option value="{{ ubi.id_ubicacion }}">{{ ubi.nombre_ubicacion }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- SELECT DINÁMICO DE ESTADO -->
+                    <div class="form-floating mb-3">
+                        <label for="estado">Estado del Elemento *</label>
+                        <br>
+                        <select class="form-select rounded-3" id="estado" name="estado" required>
+                            <option value="" selected disabled>Seleccione un estado...</option>
+                            {% for est in estados %}
+                                <option value="{{ est.id_estado }}">{{ est.nombre_estado }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- SELECT DINÁMICO DE FOTO -->
+                    <div class="form-floating mb-4">
+                        <label for="foto">Referencia de Foto *</label>
+                        <br>
+                        <select class="form-select rounded-3" id="foto" name="foto" required>
+                            <option value="" selected disabled>Seleccione un archivo/foto...</option>
+                            {% for foto in fotos %}
+                                <option value="{{ foto.id_foto }}">{{ foto.nombre_foto }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-sena rounded-pill fw-semibold shadow-sm py-2">Guardar Bien</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna Derecha: Tabla Resumen de Bienes Registrados -->
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3 text-dark">Inventario de Bienes Registrados</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Ubicación</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in bienes %}
+                            <tr>
+                                <td class="fw-bold text-secondary">{{ b.codigo_bien }}</td>
+                                <td class="fw-semibold text-dark">{{ b.nombre_bien }}</td>
+                                <!-- Gracias a las relaciones ForeignKey, Django permite navegar entre tablas directamente -->
+                                <td><span class="badge bg-warning text-dark">{{ b.ubicacion.nombre_ubicacion }}</span></td>
+                                <td><span class="badge bg-info text-dark">{{ b.estado.nombre_estado }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No hay bienes registrados en el inventario todavía.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
