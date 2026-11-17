@@ -135,3 +135,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Carpeta física donde se guardarán las fotos subidas por los usuarios
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

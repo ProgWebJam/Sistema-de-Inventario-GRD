@@ -32,16 +32,24 @@
                 
                 <form method="POST">
                     {% csrf_token %}
-                    
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control rounded-3" id="codigo_bien" name="codigo_bien" placeholder="Ej. SENA-001" required>
-                        <label for="codigo_bien">Código del Bien *</label>
-                    </div>
+
 
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control rounded-3" id="nombre_bien" name="nombre_bien" placeholder="Ej. Switch Cisco 2960" required>
-                        <label for="nombre_bien">Nombre / Descripción *</label>
+                        <label for="nombre_bien">Nombre Bien </label>
                     </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control rounded-3" id="descripcion" name="descripcion" placeholder="Ej. Switch Cisco 2960" required>
+                        <label for="descripcion">Descripción del Bien </label>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control rounded-3" id="placa" name="placa" placeholder="Ej. SENA-001" required>
+                        <label for="placa">Código del Bien</label>
+                    </div>
+
+
 
                     <!-- SELECT DINÁMICO DE UBICACIÓN -->
                     <div class="form-floating mb-3">
@@ -94,25 +102,38 @@
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
-                            <tr>
-                                <th>Código</th>
+                            <tr>   
                                 <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Placa</th>
                                 <th>Ubicación</th>
                                 <th>Estado</th>
+                                <th>Nombre Foto</th>
+                                <th>Foto</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for b in bienes %}
                             <tr>
-                                <td class="fw-bold text-secondary">{{ b.codigo_bien }}</td>
                                 <td class="fw-semibold text-dark">{{ b.nombre_bien }}</td>
+                                <td class="fw-semibold text-dark">{{ b.descripcion }}</td>
+                                <td class="fw-semibold text-dark">{{ b.placa}}</td>
                                 <!-- Gracias a las relaciones ForeignKey, Django permite navegar entre tablas directamente -->
-                                <td><span class="badge bg-warning text-dark">{{ b.ubicacion.nombre_ubicacion }}</span></td>
-                                <td><span class="badge bg-info text-dark">{{ b.estado.nombre_estado }}</span></td>
+                                <td><span class="fw-semibold text-dark">{{ b.id_ubicacion.nombre_ubicacion }}</span></td>
+                                <td><span class="fw-semibold text-dark">{{ b.id_estado.nombre_estado }}</span></td>
+                                <td><span class="fw-semibold text-dark">{{ b.id_foto.nombre_foto  }}</span></td>
+                                <td>
+                                    <!-- Navegamos directamente a la imagen relacionada -->
+                                    {% if b.id_foto.archivo %}
+                                        <img src="{{ b.id_foto.archivo.url }}" alt="{{ b.id_foto.nombre_foto }}" class="rounded shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                        <span class="badge bg-secondary">Sin imagen</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">No hay bienes registrados en el inventario todavía.</td>
+                                <td colspan="6" class="text-center text-muted py-4">No hay bienes registrados en el inventario todavía.</td>
                             </tr>
                             {% endfor %}
                         </tbody>

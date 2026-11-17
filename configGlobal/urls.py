@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include # <-- 1. Importa 'include'
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('gestion.urls')), # <-- 2. Conecta las rutas de la app 'gestion' en la raíz
 ]
+
+# ESTO ES CLAVE: Permite que Django sirva las imágenes de la carpeta media en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

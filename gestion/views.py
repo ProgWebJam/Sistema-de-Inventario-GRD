@@ -205,11 +205,13 @@ def gestionar_foto(request):
 
     if request.method == 'POST':
         nombre_img = request.POST.get('nombre_foto')
+        # Capturamos el archivo adjunto desde el formulario
+        archivo_imagen = request.FILES.get('archivo_imagen')
         try:
             if Foto.objects.filter(nombre_foto=nombre_img).exists():
                 error = "Esta Foto ya se encientra registrada."
             else:
-                Foto.objects.create(nombre_foto=nombre_img)
+                Foto.objects.create(nombre_foto=nombre_img, archivo=archivo_imagen)
                 success = "¡Foto registrada con éxito!"
         except Exception as e:
             error = f"Error técnico: {e}"

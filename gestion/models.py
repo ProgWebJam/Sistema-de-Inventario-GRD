@@ -158,6 +158,9 @@ class Estado(models.Model):
 class Foto(models.Model):
     id_foto = models.AutoField(primary_key=True)
     nombre_foto = models.CharField(max_length=255)
+    # Campo para almacenar la ruta de la imagen física
+    # (Si tu tabla de MySQL tiene este campo como VARCHAR, usa FileField o ImageField)
+    archivo = models.ImageField(upload_to='fotos_bienes/', null=True,blank=True)
 
     class Meta:
         managed = False
