@@ -26,18 +26,43 @@
 <div class="row g-4">
     <!-- Formulario de Registro -->
     <div class="col-md-4">
-        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white border-top border-warning border-4">
             <div class="card-body">
-                <h5 class="fw-bold mb-3 text-dark">Nueva Ubicación</h5>
+                <!-- TÍTULO DINÁMICO -->
+                <h5 class="fw-bold mb-3 text-dark">
+                    {% if ubicacion_editar %}
+                        Editar Ubicacion #{{ ubicacion_editar.id_ubicacion }}
+                    {% else %}
+                        Registrar Nueva Ubicacion
+                    {% endif %}    
+                </h5>
                 <form method="POST">
                     {% csrf_token %}
+
+                    <!-- CAMPO OCULTO: Si existe ubicacion_editar, guardamos su ID para que la vista sepa que estamos actualizando -->
+                     {% if ubicacion_editar %}
+                        <input type="hidden" name="id_ubicacion" value="{{ ubicacion_editar.id_ubicacion }}">
+                     {% endif %}
+
+
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control rounded-3" id="nombre_ubicacion" name="nombre_ubicacion" placeholder="Nombre de la zona" required>
+                        <!-- VALOR DINÁMICO: Si estamos editando, muestra el nombre actual; si no, entra vacío -->
+                        <input type="text" class="form-control rounded-3" id="nombre_ubicacion" name="nombre_ubicacion" 
+                        value="{% if ubicacion_editar %}{{ ubicacion_editar.nombre_ubicacion }}{% endif %}"
+                        placeholder="Nombre de la zona" required>
                         <label for="nombre_ubicacion">Nombre de Ubicación *</label>
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-sena rounded-pill fw-semibold shadow-sm">Guardar Ubicación</button>
-                    </div>
+
+                    <div class="d-flex justify-content-between gap-5">
+                        {% if ubicacion_editar %}
+                            <!-- Botón para cancelar la edición y regresar al modo creación -->
+                            <a href="{% url 'gestionar_ubicacion' %}" class="btn btn-secondary rounded-pill w-50 py-2">Cancelar</a>
+                            <button type="submit" class="btn btn-warning rounded-pill w-50 fw-semibold shadow-sm py-2 text-dark">Actualizar</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-sena rounded-pill w-100 fw-semibold shadow-sm py-2">Guardar Ubicación</button>
+                        {% endif %}
+                    </div>                   
+                    
                 </form>
             </div>
         </div>
@@ -47,13 +72,14 @@
     <div class="col-md-8">
         <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
             <div class="card-body">
-                <h5 class="fw-bold mb-3 text-dark">Ubicaciones Registradas</h5>
+                <h5 class="fw-bold mb-3 text-info">Ubicaciones Registradas</h5>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                        <thead class="table-info">
                             <tr>
                                 <th># ID</th>
                                 <th>Nombre de la Ubicación</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -61,6 +87,12 @@
                             <tr>
                                 <td class="fw-semibold text-secondary">{{ ubi.id_ubicacion }}</td>
                                 <td class="fw-bold text-dark">{{ ubi.nombre_ubicacion }}</td>
+                                <td class="text-center">
+                                    <!-- ENLACE DE EDICIÓN: Pasa el ID como parámetro GET (?editar=ID) -->
+                                    <a href="?editar={{ ubi.id_ubicacion }}" class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </a>
+                                </td>                                
                             </tr>
                             {% empty %}
                             <tr>

@@ -1,5 +1,5 @@
 import re
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Usuario, Ubicacion, Estado, Foto, Bien
 
 # FUNCIO DE LOGEO.
@@ -147,15 +147,36 @@ def pagina_inicio(request):
 def gestionar_ubicacion(request):
     error = None
     success = None
+    # Variable clave para saber si estamos editando
+    ubicacion_editar = None
+
+    # 1. Si la URL trae un 'editar_id', cargamos el objeto específico
+    editar_id = request.GET.get('editar')
+    if editar_id:
+        ubicacion_editar = get_object_or_404(Ubicacion, pk=editar_id)
 
     if request.method == 'POST':
         nombre_ubi = request.POST.get('nombre_ubicacion')
+        # Campo oculto en el formulario
+        id_registro = request.POST.get('id_ubicacion')
+
         try:
-            if Ubicacion.objects.filter(nombre_ubicacion=nombre_ubi).exists():
-                error = "Esta ubicacion ya se encuentra registrado."
-            else:
-                Ubicacion.objects.create(nombre_ubicacion=nombre_ubi)
-                success = "¡Ubicacion registrada con éxito¡"
+            # SI TIENE ID, ESTAMOS ACTUALIZANDO (EDITAR)
+            if id_registro:
+                ubicacion_obj = get_object_or_404(Ubicacion, pk=id_registro)
+                ubicacion_obj.nombre_ubicacion = nombre_ubi
+                ubicacion_obj.save()
+                success = "!Ubicación actualizada con éxito!"
+            else:    
+                if Ubicacion.objects.filter(nombre_ubicacion=nombre_ubi).exists():
+                    error = "Esta ubicacion ya se encuentra registrado."
+                else:
+                    Ubicacion.objects.create(nombre_ubicacion=nombre_ubi)
+                    success = "¡Ubicacion registrada con éxito¡"
+            
+            # Limpiamos la variable de edición tras guardar para que el formulario vuelva a modo "Crear"
+            ubicacion_editar = None
+
         except Exception as e:
             error = f"Error técnico: {e}"
 
@@ -164,6 +185,8 @@ def gestionar_ubicacion(request):
 
     context = {
         'ubicaciones': ubicaciones,
+        # Se envía a la plantilla
+        'ubicacion_editar': ubicacion_editar,
         'error': error,
         'success': success,
         'nombre_usuario': request.session.get('nombre_usuario', 'Usuario'),
