@@ -8,6 +8,8 @@
 
 {% block content %}
 
+
+
 <!-- Alertas -->
 {% if error %}
 <div class="alert alert-danger alert-dismissible fade show py-2 small" role="alert">
@@ -28,19 +30,45 @@
     <div class="col-md-4">
         <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
             <div class="card-body">
-                <h5 class="fw-bold mb-3 text-dark">Nueva Foto</h5>
+
+                <!-- TITULO DINAMICO-->
+                <h5 class="fw-bold mb-3 text-dark">
+                    {% if foto_editar %}
+                        Editar Foto # {{ foto_editar.id_foto }}
+                    {% else %}
+                        Registrar Nueva Foto
+                    {% endif %}
+
+                </h5>
+
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
+
+                    {% if foto_editar %}
+                        <input type="hidden" name="id_foto" value="{{ foto_editar.id_foto }}">
+                        
+                    {% endif %}
+                    
+                    
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control rounded-3" id="nombre_foto" name="nombre_foto" placeholder="Nombre de la Foto" required>
+                        <input type="text" class="form-control rounded-3" id="nombre_foto" name="nombre_foto"
+                        value="{% if foto_editar %} {{ foto_editar.nombre_foto }} {% endif %}"
+                        placeholder="Nombre de la Foto" required>
                         <label for="nombre_foto">Nombre de la Foto *</label>
                     </div>
                     <div class="mb-3">
                         <label for="archivo_imagen" class="form-label small fw-semibold text-muted">Adjuntar Archivo de Imagen *</label>
-                        <input type="file" class="form-control rounded-3" id="archivo_imagen" name="archivo_imagen" accept="image/*" required>
+                        <input type="file" class="form-control rounded-3" id="archivo_imagen" name="archivo_imagen" 
+                        value="{% if foto_editar %} {{ foto_editar.archivo_imagen }} {% endif %}"
+                        accept="image/*">
                     </div>                
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-sena rounded-pill fw-semibold shadow-sm">Guardar Foto</button>
+                    <div class="d-flex justify-content-between gap-5">
+                        {% if foto_editar %}
+                        <a href="{% url 'gestionar_foto' %}" class="btn btn-secondary rounded-pill w-50 py-2">Cancelar</a>
+                        <button type="submit" class="btn btn-warning rounded-pill w-50 fw-semibold shadow-sm py-2 text-dark">Actualizar</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-sena rounded-pill w-100 fw-semibold shadow-sm py-2">Guardar Foto</button>
+                        {% endif %}
                     </div>
                 </form>
             </div>
@@ -69,10 +97,33 @@
                                 <td>
                                     <!-- Si guardas la ruta de la imagen en tu base de datos -->
                                     {% if img.archivo %}
-                                        <img src="{{ img.archivo.url }}" alt="{{ img.nombre_foto }}" class="rounded shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <a href="#img-{{ img.id_foto }}" title="Ampliar imagen">
+                                            <img src="{{ img.archivo.url }}"
+                                                 alt="{{ img.nombre_foto }}"
+                                                 class="rounded shadow-sm"
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                        </a>
+
+                                        <!-- Ventana flotante sin JS -->
+                                        <div id="img-{{ img.id_foto }}" class="visor-css">
+                                            <div class="visor-css-caja">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="fw-bold text-dark">{{ img.nombre_foto }}</span>
+                                                    <a href="#cerrar-visor"><button type="button" class="btn btn-dark">Cerrar</button></a>
+                                                </div>
+                                                <img src="{{ img.archivo.url }}" alt="{{ img.nombre_foto }}" class="img-fluid rounded">
+                                            </div>
+                                        </div>
+                                        
                                     {% else %}
                                         <span class="badge bg-secondary">Sin imagen</span>
                                     {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="?editar={{ img.id_foto }}" class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-pencil-square"></i>Editar
+                                    </a>
+
                                 </td>
                             </tr>
                             {% empty %}
@@ -87,4 +138,22 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para ampliar imagen -->
+<div class="modal fade" id="modalVerImagen" tabindex="-1" aria-labelledby="modalVerImagenLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-0 pb-2">
+                <h5 class="modal-title fw-bold text-dark" id="modalVerImagenLabel">Vista de Imagen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center pt-2 pb-4">
+                <img id="imgAmpliadaSrc" src="" alt="" class="img-fluid rounded-3 shadow-sm" style="max-height: 70vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+
 {% endblock %}
+

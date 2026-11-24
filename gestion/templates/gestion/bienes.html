@@ -125,7 +125,22 @@
                                 <td>
                                     <!-- Navegamos directamente a la imagen relacionada -->
                                     {% if b.id_foto.archivo %}
-                                        <img src="{{ b.id_foto.archivo.url }}" alt="{{ b.id_foto.nombre_foto }}" class="rounded shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <a href="#img-{{ b.id_foto }}" title="Ampliar imagen">
+                                            <img src="{{ b.id_foto.archivo.url }}" 
+                                                 alt="{{ b.id_foto.nombre_foto }}" 
+                                                 class="rounded shadow-sm" 
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                        </a>
+                                                                                <!-- Ventana flotante sin JS -->
+                                        <div id="img-{{ b.id_foto }}" class="visor-css">
+                                            <div class="visor-css-caja">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="fw-bold text-dark">{{ b.nombre_foto }}</span>
+                                                    <a href="#cerrar-visor"><button type="button" class="btn btn-dark">Cerrar</button></a>
+                                                </div>
+                                                <img src="{{ b.id_foto.archivo.url }}" alt="{{ b.id_foto.nombre_foto }}" class="img-fluid rounded">
+                                            </div>
+                                        </div>
                                     {% else %}
                                         <span class="badge bg-secondary">Sin imagen</span>
                                     {% endif %}

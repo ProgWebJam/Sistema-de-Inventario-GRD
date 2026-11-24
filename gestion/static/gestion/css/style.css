@@ -88,3 +88,34 @@
         .barra-superior{
             background-color: #E8F4E0;
         }
+
+        .visor-css {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .visor-css:target {
+            display: flex;
+        }
+
+        .visor-css-caja {
+            background: #efefef;
+            padding: 16px;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            text-align: center;
+        }
+
+        .visor-css-caja img {
+            max-height: 75vh;
+            width: auto;
+            max-width: 100%;
+        }

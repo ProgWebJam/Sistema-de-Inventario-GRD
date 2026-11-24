@@ -28,15 +28,38 @@
     <div class="col-md-4">
         <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
             <div class="card-body">
-                <h5 class="fw-bold mb-3 text-dark">Nuevo Estado</h5>
+                <!-- TÍTULO DINÁMICO -->
+                <h5 class="fw-bold mb-3 text-dark">
+                    {% if estado_editar %}
+                        Editar Estado # {{ estado_editar.id_estado }}
+                    {% else %}
+                        Registrar Nuevo Estado
+                    {% endif %}
+                </h5>
                 <form method="POST">
                     {% csrf_token %}
+
+                    <!-- CAMPO OCULTO: Si existe ubicacion_editar, guardamos su ID para que la vista sepa que estamos actualizando -->
+                    {% if estado_editar %}
+                        <input type="hidden" name="id_estado" value="{{ estado_editar.id_estado }}">
+                    {% endif %}
+
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control rounded-3" id="nombre_estado" name="nombre_estado" placeholder="Nombre del Estado" required>
+                        <!-- VALOR DINÁMICO: Si estamos editando, muestra el nombre actual; si no, entra vacío -->
+                        <input type="text" class="form-control rounded-3" id="nombre_estado" name="nombre_estado" 
+                        value="{% if estado_editar %} {{ estado_editar.nombre_estado }} {% endif %}"
+                        placeholder="Nombre del Estado" required>
                         <label for="nombre_estado">Nombre del Estado *</label>
                     </div>
-                    <div class="d-grid">
+
+                    <div class="d-flex justify-content-between gap-5">
+                        {% if estado_editar %}
+                        <!-- Botón para cancelar la edición y regresar al modo creación -->
+                         <a href="{% url 'gestionar_estado' %}" class="btn btn-secondary rounded-pill w-50 py-2">Cancelar</a>
+                         <button type="submit" class="btn btn-warning rounded-pill w-50 fw-semibold shadow-sm py-2 text-dark">Actualizar</button>
+                        {% else %}    
                         <button type="submit" class="btn btn-sena rounded-pill fw-semibold shadow-sm">Guardar Estado</button>
+                        {% endif %}
                     </div>
                 </form>
             </div>
@@ -61,6 +84,12 @@
                             <tr>
                                 <td class="fw-semibold text-secondary">{{ est.id_estado }}</td>
                                 <td class="fw-bold text-dark">{{ est.nombre_estado }}</td>
+                                <td class="text-center">
+                                    <!-- ENLACE DE EDICIÓN: Pasa el ID como parámetro GET (?editar=ID) -->
+                                     <a href="?editar={{ est.id_estado }}" class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-pencil-square"></i>Editar
+                                     </a>
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>

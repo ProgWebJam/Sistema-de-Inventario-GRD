@@ -68,61 +68,102 @@ def login_view(request):
 #####################################USUARIO#################################
 # 1. FUNCIÓN AUXILIAR (Helper para procesar el registro)
 # Función interna reutilizable para validar y crear usuarios
-def _procesar_creacion_usuario(request):
-    error = None
-    success = None
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre_usuario')
-        password = request.POST.get('password')
-        rol = request.POST.get('rol')
+def _validar_password_usuario(password):
 
         #-----VALIDAR SEGURIDAD CONTRASEÑA-----#
         #Validar que la contraseña sea igual o mayor a 8 caracteres
         if len(password) < 8:
-            error = "La contraseña debe tener al menos 8 caracteres."
+            return "La contraseña debe tener al menos 8 caracteres."
         #Validar que la contraseña tenga al menos una mayuscula
         elif not re.search(r'[A-Z]',password):
-            error = "La contraseña debe contener al menos una letra mayúscula."
+            return "La contraseña debe contener al menos una letra mayúscula."
         #Validar que la contraseña tenga al menos una minuscula
         elif not re.search(r'[a-z]',password):
-            error = "La contraseña debe contener al menos una letra minúscula."
+            return "La contraseña debe contener al menos una letra minúscula."
         #Validar que la contraseña tenga caracter especial    
         elif not re.search(r'[!@#$%^&*(),.?":{}|<>\-_=+]',password):
-            error = "La contraseña debe contener al menos un carácter especial (ej. @, #, $, etc.)."
-        else:
-            try:
-                #Validar que no alla usuario duplicado
-                if Usuario.objects.filter(nombre_usuario=nombre).exists():
-                    error = "El nombre de usuario ya se encuentra resgistrado."
-                else:
-                    Usuario.objects.create(
-                        nombre_usuario=nombre,
-                        password=password,
-                        rol=rol
-                    )
-                    success = "¡Usuario creado con Exito! Ya puede iniciar sesion."
-            except Exception as e:
-                #error = "Error: El nombre de usuario ya existe o los datos son invalido. "
-                error = f"Error técnico de BD: {e}" 
-    
-    return error, success    
+            return "La contraseña debe contener al menos un carácter especial (ej. @, #, $, etc.)."
+               
+        return None  
 
 # 2. VISTA 1: El registro público (Desde el Login, diseño centrado)
-def crear_usuario_publico(request):
+""" def crear_usuario_publico(request):
     error, success = _procesar_creacion_usuario(request)
     context = {'error': error, 'success': success}
-    return render(request, 'gestion/crear_usuario.html', context)
+    return render(request, 'gestion/crear_usuario.html', context) """
 
 # 3. VISTA 2: La gestión interna (Dentro del Dashboard, con tabla y sidebar)
 def gestionar_usuario(request):
     # Reutilizamos la misma lógica de creación si envían el formulario
-    error, success = _procesar_creacion_usuario(request)
+    #error, success = _procesar_creacion_usuario(request)
+
+    error = None
+    success = None
+    usuario_editar = None
+
+    editar_id = request.GET.get('editar')
+
+    if editar_id:
+        usuario_editar = get_object_or_404(Usuario, pk=editar_id)
+
+    if request.method == 'POST':
+        nombre = (request.POST.get('nombre_usuario') or '').strip()
+        password = request.POST.get('password') or ''
+        rol = request.POST.get('rol')
+        id_registro = request.POST.get('id_usuario')
+
+        try:
+            #MODO EDITAR
+            if id_registro:
+                usuario_obj = get_object_or_404(Usuario, pk=id_registro)
+
+                if Usuario.objects.filter(nombre_usuario=nombre).exclude(pk=usuario_obj.pk).exists():
+                    error = "El nombre de usuario ya se encuentra registrado."
+                elif password:
+                    error_pwd = _validar_password_usuario(password)
+                    if error_pwd:
+                        error = error_pwd
+                    else:
+                        usuario_obj.nombre_usuario = nombre
+                        usuario_obj.rol = rol
+                        usuario_obj.password = password
+                        usuario_obj.save()
+                        success = "¡Usuario actualizado con éxito!"
+                        usuario_editar = None
+                else:
+                    # Si no se escribe nueva contraseña al editar, se mantiene la actual
+                    usuario_obj.nombre_usuario = nombre
+                    usuario_obj.rol = rol
+                    usuario_obj.save()
+                    success = "¡Usuario actualizado con éxito!"
+                    usuario_editar = None
+            
+            #MODO CREAR
+            else:
+                if Usuario.objects.filter(nombre_usuario=nombre).exists():
+                    error = "El nombre de usuario ya se encuentra registrado."
+                else:
+                    error_pwd = _validar_password_usuario(password)
+                    if error_pwd:
+                        error = error_pwd
+                    else:
+                        Usuario.objects.create(
+                            nombre_usuario=nombre,
+                            password=password,
+                            rol=rol
+                        )
+                        success = "¡Usuario creado con éxito!"
+
+        except Exception as e:
+            #error = "Error: El nombre de usuario ya existe o los datos son invalido. "
+            error = f"Error técnico de BD: {e}" 
 
     # Consultamos todos los usuarios para la tabla resumen
     usuarios = Usuario.objects.all()
 
     context = {
         'usuarios': usuarios,
+        'usuario_editar': usuario_editar,
         'error': error,
         'success': success,
         'nombre_usuario': request.session.get('nombre_usuario', 'Usuario'),
@@ -198,22 +239,41 @@ def gestionar_ubicacion(request):
 def gestionar_estado(request):
     error = None
     success = None
+    estado_editar = None # Variable clave para saber si estamos editando
+
+    edit_id = request.GET.get('editar')
+
+    if edit_id:
+        estado_editar = get_object_or_404(Estado, pk=edit_id)
 
     if request.method == 'POST':
         nombre_est = request.POST.get('nombre_estado')
+        id_registro = request.POST.get('id_estado')
+
         try:
-            if Estado.objects.filter(nombre_estado=nombre_est).exists():
-                error = "Este estado ya se encuentra registrada."
-            else:
-                Estado.objects.create(nombre_estado=nombre_est)
-                success = "¡Estado registrado con éxito!"
+            if id_registro:
+                estado_obj = get_object_or_404(Estado, pk=id_registro)
+                estado_obj.nombre_estado = nombre_est
+                estado_obj.save()
+                success = "¡Ubicación actualizada con éxito!"
+            else: 
+                if Estado.objects.filter(nombre_estado=nombre_est).exists():
+                    error = "Este estado ya se encuentra registrada."
+                else:
+                    Estado.objects.create(nombre_estado=nombre_est)
+                    success = "¡Estado registrado con éxito!"
+
+            estado_editar = None
+
         except Exception as e:
             error = f"Error técnico: {e}"
+
     # Obtenemos todas las ubicaciones para mostrarlas en una tabla resumen
     estados = Estado.objects.all()
 
     context = {
         'estados': estados,
+        'estado_editar': estado_editar,
         'error': error,
         'success': success,
         'nombre_usaurio': request.session.get('nombre_usuario', 'Usuario'),
@@ -225,17 +285,39 @@ def gestionar_estado(request):
 def gestionar_foto(request):
     error = None
     success = None
+    # Variable clave para saber si estamos editando
+    foto_editar = None
+
+    # 1. Si la URL trae un 'editar_id', cargamos el objeto específico
+    editar_id = request.GET.get('editar')
+
+    if editar_id:
+        foto_editar = get_object_or_404(Foto, pk=editar_id)
 
     if request.method == 'POST':
         nombre_img = request.POST.get('nombre_foto')
         # Capturamos el archivo adjunto desde el formulario
         archivo_imagen = request.FILES.get('archivo_imagen')
+
+        id_registro = request.POST.get('id_foto')
+
         try:
-            if Foto.objects.filter(nombre_foto=nombre_img).exists():
-                error = "Esta Foto ya se encientra registrada."
+            if id_registro:
+                foto_obj = get_object_or_404(Foto, pk=id_registro)
+                foto_obj.nombre_foto = nombre_img
+                if archivo_imagen:
+                    foto_obj.archivo = archivo_imagen
+                foto_obj.save()
+                success = "! Foto actualizada con éxito¡"
             else:
-                Foto.objects.create(nombre_foto=nombre_img, archivo=archivo_imagen)
-                success = "¡Foto registrada con éxito!"
+                if Foto.objects.filter(nombre_foto=nombre_img).exists():
+                    error = "Esta Foto ya se encientra registrada."
+                else:
+                    Foto.objects.create(nombre_foto=nombre_img, archivo=archivo_imagen)
+                    success = "¡Foto registrada con éxito!"
+            
+            foto_editar = None
+
         except Exception as e:
             error = f"Error técnico: {e}"
 
@@ -244,6 +326,7 @@ def gestionar_foto(request):
 
     context = {
         'fotos': fotos,
+        'foto_editar': foto_editar,
         'error': error,
         'success': success,
         'nombre_usuario': request.session.get('nombre_usuario','Usuario'),

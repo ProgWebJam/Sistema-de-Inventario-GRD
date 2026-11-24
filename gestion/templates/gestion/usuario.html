@@ -26,40 +26,62 @@
 <div class="row g-4">
     <!-- Columna Izquierda: Formulario de Registro -->
     <div class="col-md-4">
-        <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+        <div class="card shadow-sm border-0 rounded-4 p-3 border-top border-warning border-4 bg-white">
             <div class="card-body">
-                <div class="text-center mb-3">
-                    <h5 class="fw-bold text-dark mb-1">Nuevo Usuario</h5>
-                    <p class="text-muted small">Ingrese las credenciales de acceso</p>
-                </div>
+                <!-- TITULO DINAMICO-->
+                <h5 class="fw-bold text-dark mb-3">
+                    {% if usuario_editar %}
+                        Editar Usuario # {{ usuario_editar.id_usuario }}
+                    {% else %}
+                        Registrar Nuevo Usuario
+                    {% endif %}
+
+                </h5>
+
 
                 <form method="POST">
                     {% csrf_token %}
+
+                    {% if usuario_editar %}
+                        <input type="hidden" name="id_usuario" value="{{ usuario_editar.pk }}">
+                    {% endif %}
                     
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control rounded-3" id="nombre_usuario" name="nombre_usuario" placeholder="Ej. jhon_sena" required>
+                        <input type="text" class="form-control rounded-3" id="nombre_usuario" name="nombre_usuario"
+                        value="{% if usuario_editar %} {{ usuario_editar.nombre_usuario }} {% endif %}"
+                        placeholder="Ej. jhon_sena" required>
                         <label for="nombre_usuario">Nombre de Usuario *</label>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="password" class="form-control rounded-3" id="password" name="password" placeholder="Contraseña" required>
-                        <label for="password">Contraseña *</label>
+                        <input type="password" class="form-control rounded-3" id="password" name="password"
+                        {% if not usuario_editar %} required {% endif %}
+                        placeholder="Contraseña" required>
+                        <label for="password" class="form-label">
+                            Contraseña * {% if usuario_editar %} (Deja en blanco para conservar la contraseña  actual) {% else %} * {% endif %}
+                        </label>
                         <div class="form-text px-1" style="font-size: 11px;">Mín. 8 caracteres, mayúscula, minúscula y carácter especial.</div>
                     </div>
 
                     <div class="form-floating mb-4">
                         <select class="form-select rounded-3" id="rol" name="rol" required>
                             <option value="" selected disabled>Seleccione un rol...</option>
-                            <option value="administrador">Administrador</option>
-                            <option value="operador">Operador</option>
-                            <option value="cuentante">Cuentante</option>
+                            <option value="administrador" {% if usuario_editar and usuario_editar.rol == "administrador" %} selected {% endif %}>Administrador</option>
+                            <option value="operador" {% if usuario_editar and usuario_editar.rol == "operador" %} selected {% endif %}>Operador</option>
+                            <option value="cuentante" {% if usuario_editar and usuario_editar.rol == "cuentante" %} selected {% endif %}>Cuentante</option>
                         </select>
                         <label for="rol">Rol en el Sistema *</label>
                     </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-sena rounded-pill fw-semibold shadow-sm py-2">Registrar Usuario</button>
-                    </div>
+                    <div class="d-flex justify-content-between gap-5">
+                        {% if usuario_editar %}
+                            <!-- Botón para cancelar la edición y regresar al modo creación -->
+                            <a href="{% url 'gestionar_usuario' %}" class="btn btn-secondary rounded-pill w-50 py-2">Cancelar</a>
+                            <button type="submit" class="btn btn-warning rounded-pill w-50 fw-semibold shadow-sm py-2 text-dark">Actualizar</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-sena rounded-pill w-100 fw-semibold shadow-sm py-2">Guardar Ubicación</button>
+                        {% endif %}
+                    </div> 
                 </form>
             </div>
         </div>
@@ -89,6 +111,12 @@
                                         {{ u.rol }}
                                     </span>
                                 </td>
+                                <td class="text-center">
+                                    <!-- ENLACE DE EDICIÓN: Pasa el ID como parámetro GET (?editar=ID) -->
+                                    <a href="?editar={{ u.id_usuario }}" class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm">
+                                        <i class="bi bi-pencil-square"></i> Editar
+                                    </a>
+                                </td>   
                             </tr>
                             {% empty %}
                             <tr>
