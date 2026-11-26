@@ -28,6 +28,7 @@
     <div class="col-md-4">
         <div class="card shadow-sm border-0 rounded-4 p-3 border-top border-warning border-4 bg-white">
             <div class="card-body">
+                
                 <!-- TITULO DINAMICO-->
                 <h5 class="fw-bold text-dark mb-3">
                     {% if usuario_editar %}
@@ -56,7 +57,7 @@
                     <div class="form-floating mb-3">
                         <input type="password" class="form-control rounded-3" id="password" name="password"
                         {% if not usuario_editar %} required {% endif %}
-                        placeholder="Contraseña" required>
+                        placeholder="Contraseña">
                         <label for="password" class="form-label">
                             Contraseña * {% if usuario_editar %} (Deja en blanco para conservar la contraseña  actual) {% else %} * {% endif %}
                         </label>
@@ -66,9 +67,9 @@
                     <div class="form-floating mb-4">
                         <select class="form-select rounded-3" id="rol" name="rol" required>
                             <option value="" selected disabled>Seleccione un rol...</option>
-                            <option value="administrador" {% if usuario_editar and usuario_editar.rol == "administrador" %} selected {% endif %}>Administrador</option>
-                            <option value="operador" {% if usuario_editar and usuario_editar.rol == "operador" %} selected {% endif %}>Operador</option>
-                            <option value="cuentante" {% if usuario_editar and usuario_editar.rol == "cuentante" %} selected {% endif %}>Cuentante</option>
+                            <option value="Administrador" {% if usuario_editar and usuario_editar.rol == "Administrador" %} selected {% endif %}>Administrador</option>
+                            <option value="Invitado" {% if usuario_editar and usuario_editar.rol == "Invitado" %} selected {% endif %}>Invitado</option>
+                            <option value="Cuentante" {% if usuario_editar and usuario_editar.rol == "Cuentante" %} selected {% endif %}>Cuentante</option>
                         </select>
                         <label for="rol">Rol en el Sistema *</label>
                     </div>

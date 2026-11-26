@@ -337,9 +337,18 @@ def gestionar_foto(request):
 def gestionar_bienes(request):
     error = None
     success = None
+    #EDITAR
+    bien_editar = None
+
+    #EDITAR
+    editar_id = request.GET.get('editar')
+
+    if editar_id:
+        bien_editar = get_object_or_404(Bien, pk=editar_id)
 
     if request.method == 'POST':
         # Capturamos los datos según los campos de tu modelo
+        id_registro = request.POST.get('id_bien')
         nombre = request.POST.get('nombre_bien')
         descripcion = request.POST.get('descripcion')
         placa = request.POST.get('placa')
@@ -348,16 +357,33 @@ def gestionar_bienes(request):
         id_fot = request.POST.get('foto')
 
         try:
-            # Usamos los nombres exactos de los campos ForeignKey 
-            Bien.objects.create(
-                nombre_bien=nombre,
-                descripcion=descripcion,
-                placa=placa,
-                id_ubicacion_id=id_ubi,
-                id_estado_id=id_est,
-                id_foto_id=id_fot
-            )
-            success = "¡Bien registrado con éxito!"
+            # MODO EDITAR
+            if id_registro:
+                bien_obj = get_object_or_404(Bien, pk=id_registro)
+                bien_obj.nombre_bien = nombre
+                bien_obj.descripcion = descripcion
+                bien_obj.placa = placa                
+                bien_obj.id_ubicacion_id = id_ubi
+                bien_obj.id_estado_id = id_est
+                bien_obj.id_foto_id = id_fot
+                bien_obj.save()
+                success = "¡Bien actualizada con éxito!"
+                bien_editar = None
+
+            # MODO CREAR
+            else:
+
+                # Usamos los nombres exactos de los campos ForeignKey 
+                Bien.objects.create(
+                    nombre_bien=nombre,
+                    descripcion=descripcion,
+                    placa=placa,
+                    id_ubicacion_id=id_ubi,
+                    id_estado_id=id_est,
+                    id_foto_id=id_fot
+                )
+                success = "¡Bien registrado con éxito!"
+
         except Exception as e:
             error = f"Error técnico al registra el bien: {e}"
 
@@ -369,6 +395,7 @@ def gestionar_bienes(request):
 
     context = {
         'bienes': bienes,
+        'bien_editar': bien_editar,
         'ubicaciones': ubicaciones,
         'estados': estados,
         'fotos': fotos,
