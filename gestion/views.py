@@ -1,6 +1,8 @@
 import re
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Usuario, Ubicacion, Estado, Foto, Bien
+from django.db import IntegrityError
+from django.db.models.deletion import ProtectedError
 
 # FUNCIO DE LOGEO.
 def login_view(request):
@@ -107,56 +109,91 @@ def gestionar_usuario(request):
         usuario_editar = get_object_or_404(Usuario, pk=editar_id)
 
     if request.method == 'POST':
-        nombre = (request.POST.get('nombre_usuario') or '').strip()
-        password = request.POST.get('password') or ''
-        rol = request.POST.get('rol')
-        id_registro = request.POST.get('id_usuario')
+        eliminar_id = (request.POST.get('eliminar_id') or '').strip()
 
-        try:
-            #MODO EDITAR
-            if id_registro:
-                usuario_obj = get_object_or_404(Usuario, pk=id_registro)
+        # MODO ELIMINAR
+        if eliminar_id:
+            try:
+                usuario_eliminar = get_object_or_404(Usuario, pk=eliminar_id)
 
-                if Usuario.objects.filter(nombre_usuario=nombre).exclude(pk=usuario_obj.pk).exists():
-                    error = "El nombre de usuario ya se encuentra registrado."
-                elif password:
-                    error_pwd = _validar_password_usuario(password)
-                    if error_pwd:
-                        error = error_pwd
+                #RESTRICCION ELIMINAR USUARIO ACTUAL#
+                session_id = (
+                    request.session.get('id_usuario')
+                    or request.session.get('usuario_id')
+                )
+                sesion_nombre = request.session.get('nombre_usuario')
+
+                el_mismo_usuario = (
+                    (session_id is not None and str(usuario_eliminar.pk) == str(sesion_id))
+                    or (sesion_nombre and usuario_eliminar.nombre_usuario == sesion_nombre)
+                )
+
+                if el_mismo_usuario:
+                    error = "No se puede eliminar el usuario que tiene la sesion activa."
+                else:
+                    usuario_eliminar.delete()
+                    success = "¡Usuario eliminado con éxito!"
+
+                    if usuario_editar and str(usuario_editar.pk) == str(eliminar_id):
+                        usuario_editar = None
+
+            except (ProtectedError, IntegrityError):
+                error = "No se puede eliminar este Usuario porque tiene registros asociados en la base de datos."
+            except Exception as e:
+                error = f"Error técnico al eliminar el bien: {e}"
+
+        # MODO EDITAR Y MODO CREAR        
+        else:
+            nombre = (request.POST.get('nombre_usuario') or '').strip()
+            password = request.POST.get('password') or ''
+            rol = request.POST.get('rol')
+            id_registro = request.POST.get('id_usuario')
+
+            try:
+                #MODO EDITAR
+                if id_registro:
+                    usuario_obj = get_object_or_404(Usuario, pk=id_registro)
+
+                    if Usuario.objects.filter(nombre_usuario=nombre).exclude(pk=usuario_obj.pk).exists():
+                        error = "El nombre de usuario ya se encuentra registrado."
+                    elif password:
+                        error_pwd = _validar_password_usuario(password)
+                        if error_pwd:
+                            error = error_pwd
+                        else:
+                            usuario_obj.nombre_usuario = nombre
+                            usuario_obj.rol = rol
+                            usuario_obj.password = password
+                            usuario_obj.save()
+                            success = "¡Usuario actualizado con éxito!"
+                            usuario_editar = None
                     else:
+                        # Si no se escribe nueva contraseña al editar, se mantiene la actual
                         usuario_obj.nombre_usuario = nombre
                         usuario_obj.rol = rol
-                        usuario_obj.password = password
                         usuario_obj.save()
                         success = "¡Usuario actualizado con éxito!"
                         usuario_editar = None
-                else:
-                    # Si no se escribe nueva contraseña al editar, se mantiene la actual
-                    usuario_obj.nombre_usuario = nombre
-                    usuario_obj.rol = rol
-                    usuario_obj.save()
-                    success = "¡Usuario actualizado con éxito!"
-                    usuario_editar = None
-            
-            #MODO CREAR
-            else:
-                if Usuario.objects.filter(nombre_usuario=nombre).exists():
-                    error = "El nombre de usuario ya se encuentra registrado."
-                else:
-                    error_pwd = _validar_password_usuario(password)
-                    if error_pwd:
-                        error = error_pwd
-                    else:
-                        Usuario.objects.create(
-                            nombre_usuario=nombre,
-                            password=password,
-                            rol=rol
-                        )
-                        success = "¡Usuario creado con éxito!"
 
-        except Exception as e:
-            #error = "Error: El nombre de usuario ya existe o los datos son invalido. "
-            error = f"Error técnico de BD: {e}" 
+                #MODO CREAR
+                else:
+                    if Usuario.objects.filter(nombre_usuario=nombre).exists():
+                        error = "El nombre de usuario ya se encuentra registrado."
+                    else:
+                        error_pwd = _validar_password_usuario(password)
+                        if error_pwd:
+                            error = error_pwd
+                        else:
+                            Usuario.objects.create(
+                                nombre_usuario=nombre,
+                                password=password,
+                                rol=rol
+                            )
+                            success = "¡Usuario creado con éxito!"
+
+            except Exception as e:
+                #error = "Error: El nombre de usuario ya existe o los datos son invalido. "
+                error = f"Error técnico de BD: {e}" 
 
     # Consultamos todos los usuarios para la tabla resumen
     usuarios = Usuario.objects.all()
@@ -193,33 +230,49 @@ def gestionar_ubicacion(request):
 
     # 1. Si la URL trae un 'editar_id', cargamos el objeto específico
     editar_id = request.GET.get('editar')
+
     if editar_id:
         ubicacion_editar = get_object_or_404(Ubicacion, pk=editar_id)
 
     if request.method == 'POST':
-        nombre_ubi = request.POST.get('nombre_ubicacion')
-        # Campo oculto en el formulario
-        id_registro = request.POST.get('id_ubicacion')
+        eliminar_id = (request.POST.get('eliminar_id')or '').strip()
 
-        try:
+        #MODO ELIMINAR
+        if eliminar_id:
+            try:
+                ubicacion_eliminar = get_object_or_404(Ubicacion, pk=eliminar_id)
+                ubicacion_eliminar.delete()
+                success = "¡Ubicacion eliminado con éxito!"
+                if ubicacion_editar and str(ubicacion_editar.pk) == str(eliminar_id):
+                    ubicacion_editar = None
+            except (ProtectedError, IntegrityError):
+                error = "No se puede eliminar este bien porque tiene registro asociado en la base de datos."  
+            except Exception as e:
+                error = f"Error técnico al eliminar el bien: {e}"      
+        else:
+            nombre_ubi = request.POST.get('nombre_ubicacion')
+            # Campo oculto en el formulario
+            id_registro = request.POST.get('id_ubicacion')
+
             # SI TIENE ID, ESTAMOS ACTUALIZANDO (EDITAR)
-            if id_registro:
-                ubicacion_obj = get_object_or_404(Ubicacion, pk=id_registro)
-                ubicacion_obj.nombre_ubicacion = nombre_ubi
-                ubicacion_obj.save()
-                success = "!Ubicación actualizada con éxito!"
-            else:    
-                if Ubicacion.objects.filter(nombre_ubicacion=nombre_ubi).exists():
-                    error = "Esta ubicacion ya se encuentra registrado."
-                else:
-                    Ubicacion.objects.create(nombre_ubicacion=nombre_ubi)
-                    success = "¡Ubicacion registrada con éxito¡"
-            
-            # Limpiamos la variable de edición tras guardar para que el formulario vuelva a modo "Crear"
-            ubicacion_editar = None
+            try:
+                if id_registro:
+                    ubicacion_obj = get_object_or_404(Ubicacion, pk=id_registro)
+                    ubicacion_obj.nombre_ubicacion = nombre_ubi
+                    ubicacion_obj.save()
+                    success = "!Ubicación actualizada con éxito!"
+                else:    
+                    if Ubicacion.objects.filter(nombre_ubicacion=nombre_ubi).exists():
+                        error = "Esta ubicacion ya se encuentra registrado."
+                    else:
+                        Ubicacion.objects.create(nombre_ubicacion=nombre_ubi)
+                        success = "¡Ubicacion registrada con éxito¡"
 
-        except Exception as e:
-            error = f"Error técnico: {e}"
+                # Limpiamos la variable de edición tras guardar para que el formulario vuelva a modo "Crear"
+                ubicacion_editar = None
+
+            except Exception as e:
+                error = f"Error técnico: {e}"
 
     # Obtenemos todas las ubicaciones para mostrarlas en una tabla resumen
     ubicaciones = Ubicacion.objects.all()
@@ -247,26 +300,42 @@ def gestionar_estado(request):
         estado_editar = get_object_or_404(Estado, pk=edit_id)
 
     if request.method == 'POST':
-        nombre_est = request.POST.get('nombre_estado')
-        id_registro = request.POST.get('id_estado')
+        eliminar_id = (request.POST.get('eliminar_id') or '').strip()
 
-        try:
-            if id_registro:
-                estado_obj = get_object_or_404(Estado, pk=id_registro)
-                estado_obj.nombre_estado = nombre_est
-                estado_obj.save()
-                success = "¡Ubicación actualizada con éxito!"
-            else: 
-                if Estado.objects.filter(nombre_estado=nombre_est).exists():
-                    error = "Este estado ya se encuentra registrada."
-                else:
-                    Estado.objects.create(nombre_estado=nombre_est)
-                    success = "¡Estado registrado con éxito!"
+        if eliminar_id:
+            try:
+                estado_eliminar = get_object_or_404(Estado, pk=eliminar_id)
+                estado_eliminar.delete()
+                success = "¡Estado eliminado con éxito!"
+                if estado_editar and str(estado_editar.pk) == str(eliminar_id):
+                    estado_editar = None
+            except (ProtectedError, IntegrityError):
+                error = "No se puede eliminar este  porque tiene registros asociado en la base de datos."
+            except Exception as e:
+                error = f"Error técnico al eliminar el estado: {e}" 
 
-            estado_editar = None
+        else:
+            nombre_est = (request.POST.get('nombre_estado') or '').strip()
+            id_registro = (request.POST.get('id_estado') or '').strip()
 
-        except Exception as e:
-            error = f"Error técnico: {e}"
+            try:
+
+                if id_registro:
+                    estado_obj = get_object_or_404(Estado, pk=id_registro)
+                    estado_obj.nombre_estado = nombre_est
+                    estado_obj.save()
+                    success = "¡Ubicación actualizada con éxito!"
+                else: 
+                    if Estado.objects.filter(nombre_estado=nombre_est).exists():
+                        error = "Este estado ya se encuentra registrada."
+                    else:
+                        Estado.objects.create(nombre_estado=nombre_est)
+                        success = "¡Estado registrado con éxito!"
+
+                estado_editar = None
+
+            except Exception as e:
+                error = f"Error técnico: {e}"
 
     # Obtenemos todas las ubicaciones para mostrarlas en una tabla resumen
     estados = Estado.objects.all()
@@ -295,31 +364,50 @@ def gestionar_foto(request):
         foto_editar = get_object_or_404(Foto, pk=editar_id)
 
     if request.method == 'POST':
-        nombre_img = request.POST.get('nombre_foto')
-        # Capturamos el archivo adjunto desde el formulario
-        archivo_imagen = request.FILES.get('archivo_imagen')
+        eliminar_id = (request.POST.get('eliminar_id') or '').strip()
 
-        id_registro = request.POST.get('id_foto')
+        if eliminar_id:
+            try:
+                foto_eliminar = get_object_or_404(Foto, pk=eliminar_id)
 
-        try:
-            if id_registro:
-                foto_obj = get_object_or_404(Foto, pk=id_registro)
-                foto_obj.nombre_foto = nombre_img
-                if archivo_imagen:
-                    foto_obj.archivo = archivo_imagen
-                foto_obj.save()
-                success = "! Foto actualizada con éxito¡"
-            else:
-                if Foto.objects.filter(nombre_foto=nombre_img).exists():
-                    error = "Esta Foto ya se encientra registrada."
+                # Elimina el archivo físico en media/fotos_bienes/ si existe
+                if foto_eliminar.archivo:
+                    foto_eliminar.archivo.delete(save=False)
+
+                foto_eliminar.delete()
+                success = "¡Foto eliminado con éxito!"
+                if foto_editar and str(foto_editar) == str(eliminar_id):
+                    foto_editar = None
+            except (ProtectedError, IntegrityError):
+                error = "No se puede eliminar este estado porque tiene registros asociados en la base de datos."
+            except Exception as e:
+                error = f"Error técnico al eliminar el bien: {e}"
+
+        else:
+            nombre_img = request.POST.get('nombre_foto')
+            # Capturamos el archivo adjunto desde el formulario
+            archivo_imagen = request.FILES.get('archivo_imagen')
+            id_registro = request.POST.get('id_foto')    
+
+            try:
+                if id_registro:
+                    foto_obj = get_object_or_404(Foto, pk=id_registro)
+                    foto_obj.nombre_foto = nombre_img
+                    if archivo_imagen:
+                        foto_obj.archivo = archivo_imagen
+                    foto_obj.save()
+                    success = "! Foto actualizada con éxito¡"
                 else:
-                    Foto.objects.create(nombre_foto=nombre_img, archivo=archivo_imagen)
-                    success = "¡Foto registrada con éxito!"
-            
-            foto_editar = None
+                    if Foto.objects.filter(nombre_foto=nombre_img).exists():
+                        error = "Esta Foto ya se encientra registrada."
+                    else:
+                        Foto.objects.create(nombre_foto=nombre_img, archivo=archivo_imagen)
+                        success = "¡Foto registrada con éxito!"
 
-        except Exception as e:
-            error = f"Error técnico: {e}"
+                foto_editar = None
+
+            except Exception as e:
+                error = f"Error técnico: {e}"
 
     # Obtenemos todas las Fotos para mostrarlas en una tabla resumen
     fotos = Foto.objects.all()
@@ -347,45 +435,61 @@ def gestionar_bienes(request):
         bien_editar = get_object_or_404(Bien, pk=editar_id)
 
     if request.method == 'POST':
-        # Capturamos los datos según los campos de tu modelo
-        id_registro = request.POST.get('id_bien')
-        nombre = request.POST.get('nombre_bien')
-        descripcion = request.POST.get('descripcion')
-        placa = request.POST.get('placa')
-        id_ubi = request.POST.get('ubicacion')
-        id_est = request.POST.get('estado')
-        id_fot = request.POST.get('foto')
+        #ELIMINAR
+        eliminar_id = (request.POST.get('eliminar_id')or '').strip()
 
-        try:
-            # MODO EDITAR
-            if id_registro:
-                bien_obj = get_object_or_404(Bien, pk=id_registro)
-                bien_obj.nombre_bien = nombre
-                bien_obj.descripcion = descripcion
-                bien_obj.placa = placa                
-                bien_obj.id_ubicacion_id = id_ubi
-                bien_obj.id_estado_id = id_est
-                bien_obj.id_foto_id = id_fot
-                bien_obj.save()
-                success = "¡Bien actualizada con éxito!"
-                bien_editar = None
+        if eliminar_id:
 
-            # MODO CREAR
-            else:
+            try:
+                bien_eliminar = get_object_or_404(Bien, pk=eliminar_id)
+                bien_eliminar.delete()
+                success = "¡Registro eliminado con éxito!"
+                if bien_editar and str(bien_editar.pk) == str(eliminar_id):
+                    bien_editar = None
+            except (ProtectedError, IntegrityError):
+                error = "No se puede eliminar este registro porque está siendo utilizado en otros modulos."
+            except Exception as e:
+                error = f"Error al eliminar: {e}"
 
-                # Usamos los nombres exactos de los campos ForeignKey 
-                Bien.objects.create(
-                    nombre_bien=nombre,
-                    descripcion=descripcion,
-                    placa=placa,
-                    id_ubicacion_id=id_ubi,
-                    id_estado_id=id_est,
-                    id_foto_id=id_fot
-                )
-                success = "¡Bien registrado con éxito!"
+        # MODO EDITAR
+        else:
+            # Capturamos los datos según los campos de tu modelo
+            id_registro = (request.POST.get('id_bien') or '').strip()
+            nombre = (request.POST.get('nombre_bien') or '').strip()
+            descripcion = (request.POST.get('descripcion') or '').strip()
+            placa = request.POST.get('placa')
+            id_ubi = request.POST.get('ubicacion')
+            id_est = request.POST.get('estado')
+            id_fot = request.POST.get('foto')
 
-        except Exception as e:
-            error = f"Error técnico al registra el bien: {e}"
+            try:
+                if id_registro:
+                    bien_obj = get_object_or_404(Bien, pk=id_registro)
+                    bien_obj.nombre_bien = nombre
+                    bien_obj.descripcion = descripcion
+                    bien_obj.placa = placa                
+                    bien_obj.id_ubicacion_id = id_ubi
+                    bien_obj.id_estado_id = id_est
+                    bien_obj.id_foto_id = id_fot
+                    bien_obj.save()
+                    success = "¡Bien actualizada con éxito!"
+                    bien_editar = None
+
+                # MODO CREAR
+                else:            
+                    # Usamos los nombres exactos de los campos ForeignKey 
+                    Bien.objects.create(
+                        nombre_bien=nombre,
+                        descripcion=descripcion,
+                        placa=placa,
+                        id_ubicacion_id=id_ubi,
+                        id_estado_id=id_est,
+                        id_foto_id=id_fot
+                    )
+                    success = "¡Bien registrado con éxito!"
+
+            except Exception as e:
+                error = f"Error técnico al registra el bien: {e}"
 
     # Consultas para los selects y la tabla resumen
     bienes = Bien.objects.all()

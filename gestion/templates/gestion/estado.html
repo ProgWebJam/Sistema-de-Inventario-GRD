@@ -85,10 +85,50 @@
                                 <td class="fw-semibold text-secondary">{{ est.id_estado }}</td>
                                 <td class="fw-bold text-dark">{{ est.nombre_estado }}</td>
                                 <td class="text-center">
+
                                     <!-- ENLACE DE EDICIÓN: Pasa el ID como parámetro GET (?editar=ID) -->
                                      <a href="?editar={{ est.id_estado }}" class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm">
                                         <i class="bi bi-pencil-square"></i>Editar
                                      </a>
+
+                                    <a href="#eliminar-bien-{{ est.id_estado }}"
+                                       class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm mt-1"
+                                       title="Eliminar">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </a>
+                                    
+                                    <!-- Ventana flotante de confirmación estilo Bootstrap -->
+                                    <div id="eliminar-bien-{{ est.id_estado }}" class="visor-css">
+                                        <div class="visor-css-caja text-start" style="min-width: 320px; max-width: 440px;">
+
+                                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                                <h6 class="modal-title fw-bold text-danger mb-0">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Confirmar Eliminación
+                                                </h6>
+                                                <a href="#cerrar-eliminar" class="btn-close" aria-label="Cerrar"></a>
+                                            </div>
+
+                                            <p class="text-dark mb-1">
+                                                ¿Estás seguro de que deseas eliminar el estado <strong>{{ est.nombre_estado }}</strong>?
+                                            </p>
+                                        
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="#cerrar-eliminar" class="btn btn-sm btn-secondary rounded-pill px-3">
+                                                    Cancelar
+                                                </a>
+                                            
+                                                <form method="POST" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="eliminar_id" value="{{ est.id_estado }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3">
+                                                        <i class="bi bi-trash"></i> Sí, Eliminar
+                                                    </button>
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                 </td>
                             </tr>
                             {% empty %}
